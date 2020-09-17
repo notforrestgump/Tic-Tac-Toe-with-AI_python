@@ -1,0 +1,91 @@
+class Board:
+    """
+    Represents the Tic-Tac-Toe game board.
+
+    One of the major functions of this class is to abstract away the difference
+    between user coordinates (origin (1, 1) at bottom left) and list coordinates
+    (origin (0,0) at top left). All instance methods that take coordinates as
+    arguments must accept user-format coordinates.
+    """
+    state_int_to_str = {0: ' ', 1: 'X', 2: 'O'}  # note discrepancy ' ' vs '_'
+    state_str_to_int = {'_': 0, 'X': 1, 'O': 2}  # ^^
+
+    def __init__(self):
+        self._state = [  # 0 is blank, 1 is X, 2 is O
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]
+
+    def __str__(self):
+        output = '-' * 9  # top border
+        for row in self._state:
+            output += '\n| '  # left border
+            for num in row:
+                token = self.state_int_to_str[num]
+                output += token + ' '  # actual board spaces
+            output += '|'  # right border
+        output += '\n' + ('-' * 9)  # bottom border
+        return output
+
+    def update_cell(self, coords: tuple, token: str):
+        """
+        Updates the given space on the board with the provided token.
+
+        :param coords: (tuple of 2 ints) Board space coordinates in user format.
+        :param token: (str) The desired new token for the given space. Options
+            are ' ', 'X', and 'O'.
+        """
+        if token == ' ':
+            token = '_'  # so that state_str_to_int can read properly
+
+        row, column = self.convert_coords(coords)
+        self._state[row][column] = self.state_str_to_int[token]
+
+    def check_cell(self, coords: tuple):
+        """
+        Checks whether a given space on the board is empty, X, or O.
+
+        :param coords: (tuple of ints) Board space coordinates in user format.
+        :return: (str) Token at that spot on the board (' ', 'X', or 'O').
+        """
+        row, column = self.convert_coords(coords)
+        space_state = self._state[row][column]
+        return self.state_int_to_str[space_state]
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, new_state):
+        """
+        :param new_state: (str) The board state as a 9-character string.
+            '_' is blank, 'X' is X, 'O' is O.
+        """
+        if len(new_state) == 9:
+            for i, char in enumerate(new_state):
+                self._state[i//3][i % 3] = self.state_str_to_int[char]
+        else:
+            print('Invalid board state.')
+
+    @staticmethod
+    def convert_coords(coords: tuple):
+        """
+        Converts user-format coordinates to list-format coordinates.
+
+        :param coords: (tuple of 2 ints) (x, y) coordinates, origin (1, 1)
+            at bottom left.
+        :return: (tuple of 2 ints) (row, column) coordinates. Top row is 0,
+            first column index is 0.
+        """
+        x, y = coords
+        return (3-y), (x-1)
+
+
+if __name__ == '__main__':
+    board = Board()
+    board.state = '_XX_OO___'
+    print(board)
+    board.update_cell((1, 1), 'X')
+    print(board)
