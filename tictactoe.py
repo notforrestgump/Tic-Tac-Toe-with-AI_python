@@ -74,10 +74,10 @@ class TicTacToe:
         Instantiates the player objects and assigns them to the appropriate
         instance attributes.
 
-        :param player_type1: Type of player1 - user, easy
+        :param player_type1: Type of player1 - user, easy, medium
         :param player_type2: Type of player2
         """
-        difficulties = ['easy']
+        difficulties = ['easy', 'medium']
 
         if player_type1 == 'user':
             self.player1 = Human('X')
@@ -102,7 +102,7 @@ class TicTacToe:
         player_toggle = 0  # controls who is the current player
 
         # MAIN GAME LOOP
-        game_state = self.get_game_state()
+        game_state = self.determine_game_state()
         while game_state == 'Game not finished':
             current_player = self.players[player_toggle]
 
@@ -113,7 +113,7 @@ class TicTacToe:
 
             print(self.board)
 
-            game_state = self.get_game_state()
+            game_state = self.determine_game_state()
             player_toggle = (player_toggle + 1) % 2  # switch to the other player
 
         print(game_state + '\n')
@@ -153,9 +153,13 @@ class TicTacToe:
 
         :param player: (AI) The AI player making the move
         """
-        print('Making move level "easy"')
+        print(f'Making move level "{player.difficulty}"')
 
         move = player.calculate_move(self.board)
+        if not self.is_open_cell(move):
+            print(move)
+            raise Exception()
+
         self.board.update_cell(move, player.token)
 
     def is_open_cell(self, coords: tuple):
@@ -169,25 +173,7 @@ class TicTacToe:
         token = self.board.check_cell(coords)
         return token == ' '
 
-    def is_x_turn(self):
-        """
-        Determines whose turn it is, X or O. Since X always goes first, we know
-        it is O's turn when there are more X on the board than O.
-
-        :return: (bool) True if X should go next, False if O should go next.
-        """
-        x_count = 0
-        o_count = 0
-        for column in range(1, 4):
-            for row in range(1, 4):
-                if self.board.check_cell((column, row)) == 'X':
-                    x_count += 1
-                elif self.board.check_cell((column, row)) == 'O':
-                    o_count += 1
-
-        return o_count >= x_count
-
-    def get_game_state(self):
+    def determine_game_state(self):
         """
         Determines whether the game has concluded or remains unfinished. If the
         game is over, determines whether the outcome is an X victory, O victory,

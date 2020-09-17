@@ -53,6 +53,45 @@ class Board:
         space_state = self._state[row][column]
         return self.state_int_to_str[space_state]
 
+    def get_row(self, row_number: int):
+        """Returns the tokens in the selected row as a list."""
+        row_tokens = []
+        for column in range(1, 4):
+            row_tokens.append(self.check_cell((column, row_number)))
+
+        return row_tokens
+
+    def get_column(self, column_number: int):
+        """Returns the tokens in the selected column as a list."""
+        column_tokens = []
+        for row in range(3, 0, -1):
+            column_tokens.append(self.check_cell((column_number, row)))
+
+        return column_tokens
+
+    def get_diagonal(self, diagonal_number: int):
+        """
+        Returns the tokens in the selected diagonal as a list, ordered from
+        topmost to bottommost.
+
+        :param diagonal_number: 1 indicates the diagonal which includes (1, 3),
+            and 2 indicates the diagonal which includes (1, 1).
+        :return: (list of str) The elements of the chosen diagonal from top to
+            bottom.
+        """
+        if diagonal_number == 1:
+            diagonal_tokens = [self.check_cell((1, 3)),
+                               self.check_cell((2, 2)),
+                               self.check_cell((3, 1))]
+        elif diagonal_number == 2:
+            diagonal_tokens = [self.check_cell((3, 3)),
+                               self.check_cell((2, 2)),
+                               self.check_cell((1, 1))]
+        else:
+            diagonal_tokens = None
+
+        return diagonal_tokens
+
     @property
     def state(self):
         return self._state
@@ -85,7 +124,6 @@ class Board:
 
 if __name__ == '__main__':
     board = Board()
-    board.state = '_XX_OO___'
+    board.state = '____X__XO'
     print(board)
-    board.update_cell((1, 1), 'X')
-    print(board)
+    print('|', ''.join(board.get_column(2)), '|')
