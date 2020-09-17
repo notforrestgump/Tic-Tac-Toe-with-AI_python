@@ -3,9 +3,20 @@ from Player import Human, AI
 
 
 class InvalidTokenError(Exception):
+    """To be raised when a token other than 'X' or 'O' is passed/used."""
     def __init__(self, token):
         self.message = f"{token} is not a valid token. Valid tokens are 'X' " \
                        f"and 'O'."
+        super().__init__(self.message)
+
+
+class InvalidPlayerTypeError(Exception):
+    """
+    To be raised when an invalid player type is selected. (user/difficulty)
+    """
+    def __init__(self, player_type: str):
+        self.message = f"{player_type} is not a valid player type. Please" \
+                       f" choose 'user' or a valid difficulty."
         super().__init__(self.message)
 
 
@@ -15,15 +26,77 @@ class TicTacToe:
     """
     def __init__(self):
         self.board = Board()
-        self.player1 = Human()
-        self.player2 = AI(0)
-        self.players = (self.player1, self.player2)
+        self.player1 = None  # X
+        self.player2 = None  # O
+        self.players = tuple()
 
     def run(self):
+        """User-facing method for starting the application loop."""
+        while True:
+            exit_or_nah = self.menu()
+
+            if exit_or_nah is None:
+                self.board.state = '_________'
+                self.play()
+            else:
+                break
+
+    def menu(self):
         """
-        Call this to begin the game.
+        Enters a menu loop. User can start a game or exit.
+
+        :return: 'exit' (str) if the user wants to quit the application, None
+            otherwise.
         """
-        self.board.state = '_________'
+        while True:
+            action = input('Input command: ').strip()
+
+            if action.startswith('start'):
+                commands = action.split()
+                if len(commands) != 3:  # start input must have 3 commands
+                    print('Bad parameters!')
+                else:
+                    players = tuple(commands[1:])  # extract player types
+                    try:
+                        self.create_players(players[0], players[1])
+                        return None
+                    except InvalidPlayerTypeError as e:
+                        print(e.message)
+
+            elif action == 'exit':
+                return action
+
+            else:
+                print('Bad parameters!')
+
+    def create_players(self, player_type1: str, player_type2: str):
+        """
+        Instantiates the player objects and assigns them to the appropriate
+        instance attributes.
+
+        :param player_type1: Type of player1 - user, easy
+        :param player_type2: Type of player2
+        """
+        difficulties = ['easy']
+
+        if player_type1 == 'user':
+            self.player1 = Human('X')
+        elif player_type1 in difficulties:
+            self.player1 = AI('X', player_type1)
+        else:
+            raise InvalidPlayerTypeError(player_type1)
+
+        if player_type2 == 'user':
+            self.player2 = Human('O')
+        elif player_type2 in difficulties:
+            self.player2 = AI('O', player_type2)
+        else:
+            raise InvalidPlayerTypeError(player_type2)
+
+        self.players = (self.player1, self.player2)
+
+    def play(self):
+        """Call this to play the game."""
         print(self.board)
 
         player_toggle = 0  # controls who is the current player
@@ -43,7 +116,7 @@ class TicTacToe:
             game_state = self.get_game_state()
             player_toggle = (player_toggle + 1) % 2  # switch to the other player
 
-        print(game_state)
+        print(game_state + '\n')
 
     def do_user_move(self, player: Human):
         """
@@ -185,27 +258,6 @@ class TicTacToe:
             return True
 
         return False
-
-    @staticmethod
-    def get_start_state():
-        """
-        Takes the board start state from the standard input. Input must be 9
-        characters long consisting of no characters other than '_', 'X',
-        and 'O'.
-
-        :return: (str) The start state, 9 characters long.
-        """
-        while True:
-            start_state = input('Enter cells: ').strip()
-
-            if len(start_state) != 9:
-                print('Invalid start state: 9 characters required.')
-            elif any([c not in ['_', 'X', 'O'] for c in start_state]):
-                print("Invalid start state: restrict input to '_', 'X', 'O'")
-            else:
-                break
-
-        return start_state
 
     @staticmethod
     def move_is_on_board(coords: tuple):
