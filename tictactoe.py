@@ -1,4 +1,5 @@
 from Board import Board
+from Player import Human, AI
 
 
 class InvalidTokenError(Exception):
@@ -14,28 +15,46 @@ class TicTacToe:
     """
     def __init__(self):
         self.board = Board()
+        self.player1 = Human()
+        self.player2 = AI(0)
+        self.players = (self.player1, self.player2)
 
     def run(self):
         """
         Call this to begin the game.
         """
-        self.board.state = self.get_start_state()
+        self.board.state = '_________'
         print(self.board)
 
-        self.user_move()
-        print(self.board)
+        player_toggle = 0  # controls who is the current player
 
+        # MAIN GAME LOOP
         game_state = self.get_game_state()
+        while game_state == 'Game not finished':
+            current_player = self.players[player_toggle]
+
+            if type(current_player) is Human:
+                self.do_user_move(current_player)
+            elif type(current_player) is AI:
+                self.do_computer_move(current_player)
+
+            print(self.board)
+
+            game_state = self.get_game_state()
+            player_toggle = (player_toggle + 1) % 2  # switch to the other player
+
         print(game_state)
 
-    def user_move(self):
+    def do_user_move(self, player: Human):
         """
         Takes the user's move from the standard input and updates the board.
         Checks to be sure that the move is valid and requests input until a
         valid move is given.
+
+        :param player: (Human) The human user object making the move.
         """
         while True:
-            move = input('Enter the coordinates: ').strip().split()
+            move = player.get_move()
 
             try:
                 move = [int(s) for s in move]
@@ -50,14 +69,21 @@ class TicTacToe:
                     print('Coordinates should be from 1 to 3!')
                 elif not self.is_open_cell(move):
                     print('This cell is occupied! Choose another one!')
-                else:
 
-                    if self.is_x_turn():
-                        token = 'X'
-                    else:
-                        token = 'O'
-                    self.board.update_cell(move, token)
+                else:
+                    self.board.update_cell(move, player.token)
                     break
+
+    def do_computer_move(self, player: AI):
+        """
+        Performs a move for an AI player.
+
+        :param player: (AI) The AI player making the move
+        """
+        print('Making move level "easy"')
+
+        move = player.calculate_move(self.board)
+        self.board.update_cell(move, player.token)
 
     def is_open_cell(self, coords: tuple):
         """
