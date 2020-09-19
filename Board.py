@@ -8,7 +8,7 @@ class Board:
     arguments must accept user-format coordinates.
     """
     state_int_to_str = {0: ' ', 1: 'X', 2: 'O'}  # note discrepancy ' ' vs '_'
-    state_str_to_int = {'_': 0, 'X': 1, 'O': 2}  # ^^
+    state_str_to_int = {' ': 0, '_': 0, 'X': 1, 'O': 2}  # ^^
 
     def __init__(self):
         self._state = [  # 0 is blank, 1 is X, 2 is O

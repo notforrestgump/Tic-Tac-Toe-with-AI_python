@@ -77,7 +77,7 @@ class TicTacToe:
         :param player_type1: Type of player1 - user, easy, medium
         :param player_type2: Type of player2
         """
-        difficulties = ['easy', 'medium']
+        difficulties = ['easy', 'medium', 'hard']
 
         if player_type1 == 'user':
             self.player1 = Human('X')
